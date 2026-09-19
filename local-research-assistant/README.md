@@ -10,6 +10,54 @@ Everything it does is logged, and there is an eval harness that puts it head to
 head against the obvious cheaper alternative — one model call with a search
 bolted on — so the extra credits have to justify themselves.
 
+**Stack:** Python 3.11+ · Ollama (`qwen3`) · Tavily · Exa · Flask · Chart.js
+**Runs on:** a single 8 GB GPU (tested on an RTX 4060)
+
+## Quick start
+
+```bash
+git clone https://github.com/<your-username>/local-research-assistant.git
+cd local-research-assistant
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
+ollama pull qwen3:8b
+ollama pull nomic-embed-text
+
+cp .env.example .env    # add your TAVILY_API_KEY and EXA_API_KEY
+
+python selftest.py                      # offline check, no keys/GPU needed
+python main.py "your research question"
+python dashboard/app.py                 # http://127.0.0.1:5000
+```
+
+Full setup, the Ollama concurrency flags this depends on, and a staged testing
+guide (offline → live) are below and in [TESTING.md](TESTING.md).
+
+## Contents
+
+- [Architecture](#architecture) — the pipeline, and why it's a 2-worker queue not a fan-out
+- [Setup](#setup)
+- [Running it](#running-it)
+- [What is in the box](#what-is-in-the-box)
+- [The run log](#the-run-log)
+- [Evaluation](#evaluation)
+- [Deviations from the original spec](#deviations-from-the-original-spec)
+- [Testing](#testing)
+
+## Status
+
+Verified with 53/53 offline self-tests and a clean 20-question eval run against
+scripted clients (`--fake` mode) — the wiring, schemas, and guardrails all check
+out. It has **not** been benchmarked end-to-end against live Ollama/Tavily/Exa
+at scale; do that on your own hardware with `eval/run_eval.py --limit 3` before
+trusting the numbers on anything larger. See [Status details](#verification-status).
+
+## License
+
+[MIT](LICENSE) — swap it for whatever you prefer before publishing if MIT
+isn't the right fit.
+
 ---
 
 ## Architecture

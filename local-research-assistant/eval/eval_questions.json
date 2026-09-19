@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "description": "Held-out research questions for comparing the multi-agent pipeline against a single-call baseline. Varied by domain and by how much decomposition the question rewards.",
+  "questions": [
+    {
+      "id": "q01",
+      "domain": "energy",
+      "complexity": "medium",
+      "question": "How is grid-scale battery storage actually financed, and what has changed in the last two years?"
+    },
+    {
+      "id": "q02",
+      "domain": "security",
+      "complexity": "high",
+      "question": "What have post-quantum cryptography migrations taught organisations about their own cryptographic inventories?"
+    },
+    {
+      "id": "q03",
+      "domain": "economics",
+      "complexity": "high",
+      "question": "Why do measures of inflation expectations disagree with each other, and which has the better forecasting record?"
+    },
+    {
+      "id": "q04",
+      "domain": "biology",
+      "complexity": "medium",
+      "question": "What is the current evidence on whether gut microbiome transplants improve metabolic outcomes in adults?"
+    },
+    {
+      "id": "q05",
+      "domain": "computing",
+      "complexity": "medium",
+      "question": "Why has RISC-V adoption moved faster in embedded systems than in servers?"
+    },
+    {
+      "id": "q06",
+      "domain": "policy",
+      "complexity": "high",
+      "question": "How have different jurisdictions defined 'high-risk' AI systems, and where do those definitions conflict?"
+    },
+    {
+      "id": "q07",
+      "domain": "climate",
+      "complexity": "medium",
+      "question": "What do direct air capture cost curves look like once energy inputs are accounted for?"
+    },
+    {
+      "id": "q08",
+      "domain": "software",
+      "complexity": "low",
+      "question": "What are the practical trade-offs between WebAssembly and containers for edge compute?"
+    },
+    {
+      "id": "q09",
+      "domain": "medicine",
+      "complexity": "high",
+      "question": "How durable is the weight loss from GLP-1 receptor agonists after patients stop taking them?"
+    },
+    {
+      "id": "q10",
+      "domain": "labour",
+      "complexity": "medium",
+      "question": "What measurable effects have four-day-week trials had on productivity and turnover?"
+    },
+    {
+      "id": "q11",
+      "domain": "security",
+      "complexity": "medium",
+      "question": "How do software bills of materials change incident response in practice, and what are their known gaps?"
+    },
+    {
+      "id": "q12",
+      "domain": "materials",
+      "complexity": "medium",
+      "question": "What is limiting sodium-ion batteries from displacing lithium iron phosphate in stationary storage?"
+    },
+    {
+      "id": "q13",
+      "domain": "ml",
+      "complexity": "high",
+      "question": "What evidence is there that retrieval-augmented generation reduces hallucination rather than relocating it?"
+    },
+    {
+      "id": "q14",
+      "domain": "urban",
+      "complexity": "low",
+      "question": "What happened to traffic volumes and revenue after New York's congestion pricing launch?"
+    },
+    {
+      "id": "q15",
+      "domain": "space",
+      "complexity": "medium",
+      "question": "How are satellite operators actually handling collision avoidance as orbital density rises?"
+    },
+    {
+      "id": "q16",
+      "domain": "economics",
+      "complexity": "medium",
+      "question": "What does the evidence say about remote work's effect on commercial property values in mid-sized cities?"
+    },
+    {
+      "id": "q17",
+      "domain": "ml",
+      "complexity": "high",
+      "question": "How do mixture-of-experts models change the relationship between parameter count and serving cost?"
+    },
+    {
+      "id": "q18",
+      "domain": "agriculture",
+      "complexity": "medium",
+      "question": "What is the measured yield impact of regenerative agriculture practices over a full rotation?"
+    },
+    {
+      "id": "q19",
+      "domain": "networking",
+      "complexity": "low",
+      "question": "Why has IPv6 adoption plateaued in some large markets while accelerating in others?"
+    },
+    {
+      "id": "q20",
+      "domain": "health-systems",
+      "complexity": "high",
+      "question": "What have ambulance handover delays been attributed to, and which interventions have measurable effects?"
+    }
+  ]
+}

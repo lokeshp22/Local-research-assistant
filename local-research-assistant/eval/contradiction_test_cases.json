@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "description": "Controlled tests for the critic. Each case injects source snippets that cannot all be true. Tavily and Exa are replaced by fixture clients that return these snippets verbatim, so the only variable is whether the critic flags the conflict. Pass/fail is determined programmatically, not by an LLM judgement.",
+  "cases": [
+    {
+      "id": "ct01",
+      "query": "How much did utility-scale solar capacity change in the Iberian grid last year?",
+      "expect": "flagged",
+      "conflict_summary": "Two sources give opposite directions for the same quantity.",
+      "sources": [
+        {
+          "url": "https://gridmonitor-example.org/iberia-solar-2024",
+          "title": "Iberian Grid Monitor: solar capacity review",
+          "author": "Grid Monitor Analysis Desk",
+          "text": "Utility-scale solar capacity on the Iberian grid increased by 14 percent last year, rising from 21.4 GW to 24.4 GW. The figure rose across both Spain and Portugal."
+        },
+        {
+          "url": "https://energy-review-example.net/iberia-solar-decline",
+          "title": "Energy Review: Iberian solar capacity falls",
+          "author": "Energy Review Staff",
+          "text": "Utility-scale solar capacity on the Iberian grid decreased by 6 percent last year, falling from 21.4 GW to 20.1 GW as curtailment made new projects uneconomic. Installed capacity fell in both markets."
+        }
+      ]
+    },
+    {
+      "id": "ct02",
+      "query": "What is the measured latency overhead of the Helvet-7 sandboxing runtime?",
+      "expect": "flagged",
+      "conflict_summary": "Same benchmark, incompatible numeric results.",
+      "sources": [
+        {
+          "url": "https://benchlab-example.org/helvet7-overhead",
+          "title": "BenchLab: Helvet-7 runtime overhead",
+          "author": "BenchLab Performance Group",
+          "text": "Across the standard suite, the Helvet-7 sandboxing runtime added 3 percent latency overhead relative to the unsandboxed baseline. Overhead was lower than competing runtimes."
+        },
+        {
+          "url": "https://systems-notes-example.net/helvet7-cost",
+          "title": "Systems Notes: the real cost of Helvet-7",
+          "author": "Systems Notes Editorial",
+          "text": "Across the standard suite, the Helvet-7 sandboxing runtime added 41 percent latency overhead relative to the unsandboxed baseline. Overhead was higher than competing runtimes."
+        }
+      ]
+    },
+    {
+      "id": "ct03",
+      "query": "Is the Marden-9 preservative considered safe for use in packaged food?",
+      "expect": "flagged",
+      "conflict_summary": "Directly opposing safety conclusions from two regulators.",
+      "sources": [
+        {
+          "url": "https://food-standards-example.org/marden9-assessment",
+          "title": "Food Standards Authority: Marden-9 assessment",
+          "author": "Food Standards Authority",
+          "text": "Following review, the Marden-9 preservative is considered safe for use in packaged food at the permitted concentration. The assessment found no effective evidence of harm."
+        },
+        {
+          "url": "https://consumer-health-example.net/marden9-warning",
+          "title": "Consumer Health Board: Marden-9 withdrawal notice",
+          "author": "Consumer Health Board",
+          "text": "Following review, the Marden-9 preservative is considered unsafe for use in packaged food at the permitted concentration and its authorisation has been withdrawn."
+        }
+      ]
+    },
+    {
+      "id": "ct04",
+      "query": "Did the Kessington four-day week trial improve or worsen staff turnover?",
+      "expect": "flagged",
+      "conflict_summary": "Opposing directional findings from the same trial.",
+      "sources": [
+        {
+          "url": "https://worklab-example.org/kessington-results",
+          "title": "WorkLab: Kessington trial results",
+          "author": "WorkLab Research Unit",
+          "text": "Staff turnover decreased by 18 percent over the Kessington four-day week trial. Retention improves markedly where workload was rebalanced."
+        },
+        {
+          "url": "https://industry-brief-example.net/kessington-reversal",
+          "title": "Industry Brief: Kessington trial reversal",
+          "author": "Industry Brief Desk",
+          "text": "Staff turnover increased by 9 percent over the Kessington four-day week trial. Retention worsens where compressed hours raised daily intensity."
+        }
+      ]
+    },
+    {
+      "id": "ct05",
+      "query": "How many peer-reviewed replications support the Tolvern effect?",
+      "expect": "flagged",
+      "conflict_summary": "Irreconcilable replication counts, one source anonymous.",
+      "sources": [
+        {
+          "url": "https://meta-science-example.org/tolvern-replications",
+          "title": "Meta-Science Review: Tolvern replication record",
+          "author": "Meta-Science Review Board",
+          "text": "A total of 12 peer-reviewed replications support the Tolvern effect, and the supporting literature grew through the review window."
+        },
+        {
+          "url": "https://reddit.com/r/example/tolvern_thread",
+          "title": "Discussion thread on the Tolvern effect",
+          "author": "",
+          "text": "A total of 2 peer-reviewed replications support the Tolvern effect, and the supporting literature shrank once failed attempts were counted."
+        }
+      ]
+    }
+  ]
+}

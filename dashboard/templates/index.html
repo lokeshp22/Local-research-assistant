@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research pipeline · run log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --paper:#EDEFEC; --card:#F7F8F6; --ink:#17211F; --muted:#5E6B68;
+  --rule:#CBD2CD; --rule-strong:#A9B4AE;
+  --kept:#2E6F53; --flagged:#B4701A; --rejected:#9B3B33;
+  --agent:#2E6F53; --baseline:#6D7B95;
+  --focus:#1F5C8C;
+  --sans:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#141B1A; --card:#1C2523; --ink:#E6EBE8; --muted:#94A29D;
+    --rule:#2C3936; --rule-strong:#3F4F4B;
+    --kept:#5EA985; --flagged:#D69A44; --rejected:#CE7168;
+    --agent:#5EA985; --baseline:#95A5BE; --focus:#78B6E8;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font:400 16px/1.55 var(--sans);
+  padding:0 20px 80px;
+}
+.wrap{max-width:1080px;margin:0 auto}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* header */
+header{padding:36px 0 22px;display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;justify-content:space-between}
+h1{font:600 25px/1.2 var(--sans);margin:0;letter-spacing:-.015em}
+header p{margin:0;color:var(--muted);font-size:14px}
+header .path{font-family:var(--mono);font-size:12.5px}
+
+/* the gate — the one bold element on the page */
+.gate{background:var(--ink);color:var(--paper);padding:24px 26px 22px;border-radius:3px}
+.gate h2{font:500 14px/1 var(--sans);margin:0 0 16px;color:#A9BAB4}
+.gate .total{font:700 46px/1 var(--sans);letter-spacing:-.03em;margin:0 0 4px}
+.gate .total small{font:400 15px/1 var(--sans);color:#A9BAB4;margin-left:9px;letter-spacing:0}
+.flow{display:flex;height:16px;margin:18px 0 12px;border-radius:2px;overflow:hidden;background:#2A3734}
+.flow span{display:block;height:100%}
+.flow .k{background:var(--kept)} .flow .f{background:var(--flagged)} .flow .r{background:var(--rejected)}
+.legend{display:flex;flex-wrap:wrap;gap:22px;font-size:14px;color:#C6D2CD}
+.legend b{font-family:var(--mono);font-weight:500;color:var(--paper)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;font-style:normal}
+.gate footer{margin-top:18px;padding-top:15px;border-top:1px solid #33423E;display:flex;flex-wrap:wrap;gap:26px;font-size:14px;color:#C6D2CD}
+.gate footer b{font-family:var(--mono);font-weight:500;color:var(--paper)}
+
+/* sections */
+section{margin-top:40px}
+h2.sec{font:600 17px/1.3 var(--sans);margin:0 0 4px;letter-spacing:-.01em}
+.note{color:var(--muted);font-size:14px;margin:0 0 16px;max-width:66ch}
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:840px){.panels{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:18px}
+.panel h3{font:500 14px/1.3 var(--sans);margin:0 0 2px}
+.panel p.sub{margin:0 0 14px;color:var(--muted);font-size:13px}
+.chart-box{position:relative;height:250px}
+
+/* table */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+input[type=search]{
+  flex:1 1 260px;min-width:0;font:400 14px var(--sans);color:var(--ink);
+  background:var(--card);border:1px solid var(--rule-strong);border-radius:3px;padding:9px 11px;
+}
+input[type=search]::placeholder{color:var(--muted)}
+.count{color:var(--muted);font-size:13.5px;font-family:var(--mono)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+thead th{
+  text-align:left;font:500 13px var(--sans);color:var(--muted);
+  padding:0 10px 8px;border-bottom:1px solid var(--rule-strong);white-space:nowrap;
+}
+thead th.num,tbody td.num{text-align:right}
+tbody tr.row{border-bottom:1px solid var(--rule);cursor:pointer}
+tbody tr.row:hover{background:var(--card)}
+tbody tr.row[aria-expanded=true]{background:var(--card)}
+tbody td{padding:11px 10px;vertical-align:top}
+td.num,td.mono{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums}
+td.q{max-width:0;width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
+.dot.ok{background:var(--kept)} .dot.degraded{background:var(--flagged)} .dot.failed{background:var(--rejected)}
+.tag{font:500 11px var(--sans);color:var(--muted);border:1px solid var(--rule-strong);border-radius:2px;padding:1px 5px;margin-left:6px}
+.kfr b{font-family:var(--mono);font-weight:500}
+.kfr .k{color:var(--kept)} .kfr .f{color:var(--flagged)} .kfr .r{color:var(--rejected)}
+
+/* detail */
+tr.detail>td{background:var(--card);padding:0 10px 22px;border-bottom:1px solid var(--rule-strong)}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;padding-top:6px}
+@media (max-width:840px){.detail-grid{grid-template-columns:1fr}}
+.detail h4{font:600 13px/1.3 var(--sans);margin:18px 0 8px}
+.detail ul{margin:0;padding-left:18px}
+.detail li{margin-bottom:7px}
+.claim{border-left:3px solid var(--rule-strong);padding:2px 0 2px 11px;margin-bottom:11px}
+.claim.kept{border-color:var(--kept)} .claim.flagged{border-color:var(--flagged)} .claim.rejected{border-color:var(--rejected)}
+.claim .why{color:var(--muted);font-size:13px;margin-top:3px}
+.claim .src{font-family:var(--mono);font-size:12px;color:var(--muted);word-break:break-all}
+.report{background:var(--paper);border:1px solid var(--rule);border-radius:3px;padding:14px 16px;white-space:pre-wrap;font-size:14px;max-height:420px;overflow:auto}
+.empty{color:var(--muted);font-size:14px;background:var(--card);border:1px dashed var(--rule-strong);border-radius:3px;padding:18px}
+.empty code{font-family:var(--mono);font-size:13px;background:var(--paper);padding:2px 5px;border-radius:2px}
+.cases{list-style:none;margin:14px 0 0;padding:0;font-size:14px}
+.cases li{display:flex;gap:12px;padding:8px 0;border-top:1px solid var(--rule)}
+.cases .v{font-family:var(--mono);font-weight:500;flex:0 0 46px}
+.cases .pass{color:var(--kept)} .cases .fail{color:var(--rejected)}
+.cases .id{font-family:var(--mono);flex:0 0 52px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>Research pipeline run log</h1>
+    <p>Planner, two search workers, one critic. Every claim shown here was kept, flagged or thrown out by the critic before the report was written.</p>
+  </div>
+  <p class="path" id="logpath"></p>
+</header>
+
+<div class="gate" id="gate">
+  <h2>What the critic did with the claims</h2>
+  <p class="total" id="gate-total">—</p>
+  <div class="flow" id="gate-flow"><span class="k" style="width:0"></span><span class="f" style="width:0"></span><span class="r" style="width:0"></span></div>
+  <div class="legend" id="gate-legend"></div>
+  <footer id="gate-foot"></footer>
+</div>
+
+<section>
+  <h2 class="sec">Multi-agent against the single-call baseline</h2>
+  <p class="note">Depth is the only score a model assigns, and it sees the two reports in randomised order. Citation coverage and source diversity are computed from the run record: a citation counts only when its number resolves to a source the pipeline actually retrieved.</p>
+  <div class="panels">
+    <div class="panel">
+      <h3>Depth score by question</h3>
+      <p class="sub">Judge rating, 1 to 5</p>
+      <div class="chart-box"><canvas id="depthChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <h3>Citations and sources</h3>
+      <p class="sub">Averaged across the question set</p>
+      <div class="chart-box"><canvas id="qualityChart"></canvas></div>
+    </div>
+  </div>
+  <div id="eval-empty"></div>
+</section>
+
+<section>
+  <h2 class="sec">Seeded contradiction tests</h2>
+  <p class="note">Each case feeds the pipeline sources that cannot all be true. A case passes only when the critic raises a contradiction spanning two different injected sources. No model scores this.</p>
+  <p id="ct-summary" style="font:600 22px var(--sans);margin:0">—</p>
+  <ul class="cases" id="ct-cases"></ul>
+</section>
+
+<section>
+  <h2 class="sec">Runs</h2>
+  <p class="note">Select a run to see its sub-questions, every claim with the critic's verdict, and the report that came out.</p>
+  <div class="toolbar">
+    <input type="search" id="filter" placeholder="Filter by question, run id or status" aria-label="Filter runs">
+    <span class="count" id="rowcount"></span>
+  </div>
+  <table>
+    <thead><tr>
+      <th>Run</th><th>Question</th><th>Claims</th>
+      <th class="num">Coverage</th><th class="num">Domains</th>
+      <th class="num">Time</th><th class="num">Credits</th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div id="runs-empty"></div>
+</section>
+
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const pct = (v) => Math.round((v || 0) * 100) + "%";
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => (
+  {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+let RUNS = [], DETAIL = {}, OPEN = null;
+
+async function getJSON(url){
+  const res = await fetch(url);
+  const body = await res.json().catch(() => ({}));
+  if(!res.ok) throw Object.assign(new Error(body.error || res.statusText), {body, status: res.status});
+  return body;
+}
+
+/* ---------------- gate ---------------- */
+function renderGate(totals){
+  const kept = totals.kept || 0, flagged = totals.flagged || 0, rejected = totals.rejected || 0;
+  const total = kept + flagged + rejected;
+  $("gate-total").innerHTML = total
+    ? `${total}<small>claims across ${totals.runs} run${totals.runs === 1 ? "" : "s"}</small>`
+    : `0<small>no claims logged yet</small>`;
+  const flow = $("gate-flow").children;
+  const w = (n) => total ? (n / total * 100) + "%" : "0%";
+  flow[0].style.width = w(kept); flow[1].style.width = w(flagged); flow[2].style.width = w(rejected);
+  $("gate-legend").innerHTML = [
+    ["kept", kept, "--kept"], ["flagged", flagged, "--flagged"], ["thrown out", rejected, "--rejected"]
+  ].map(([label, n, v]) =>
+    `<span><i style="background:${css(v)}"></i>${label} <b>${n}</b>${total ? ` · ${pct(n / total)}` : ""}</span>`
+  ).join("");
+  $("gate-foot").innerHTML =
+    `<span>Tavily <b>${totals.tavily_credits ?? 0}</b> credits</span>` +
+    `<span>Exa <b>${totals.exa_credits ?? 0}</b> credits</span>` +
+    `<span>Runs that hit a failure or timeout <b>${totals.degraded ?? 0}</b></span>`;
+}
+
+/* ---------------- charts ---------------- */
+Chart.defaults.font.family = "Archivo, Helvetica Neue, Arial, sans-serif";
+Chart.defaults.font.size = 12;
+
+function chartColors(){
+  return {agent: css("--agent"), baseline: css("--baseline"), ink: css("--ink"),
+          muted: css("--muted"), rule: css("--rule")};
+}
+
+function renderEvalCharts(data){
+  const c = chartColors();
+  Chart.defaults.color = c.muted;
+  const rows = data.results || [];
+
+  new Chart($("depthChart"), {
+    type: "line",
+    data: {
+      labels: rows.map(r => r.id),
+      datasets: [
+        {label:"Multi-agent", data: rows.map(r => r.multi_agent.depth),
+         borderColor:c.agent, backgroundColor:c.agent, tension:.25, pointRadius:3, borderWidth:2},
+        {label:"Baseline", data: rows.map(r => r.baseline.depth),
+         borderColor:c.baseline, backgroundColor:c.baseline, tension:.25, pointRadius:3,
+         borderWidth:2, borderDash:[5,4]}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, interaction:{mode:"index", intersect:false},
+      scales:{
+        y:{min:0, max:5, ticks:{stepSize:1}, grid:{color:c.rule}},
+        x:{grid:{display:false}}
+      },
+      plugins:{
+        legend:{position:"bottom", labels:{boxWidth:11, boxHeight:11, usePointStyle:true, pointStyle:"rect"}},
+        tooltip:{callbacks:{title:(i) => rows[i[0].dataIndex]?.question || ""}}
+      }
+    }
+  });
+
+  const agg = data.aggregate || {};
+  const ma = agg.multi_agent || {}, bl = agg.baseline || {};
+  new Chart($("qualityChart"), {
+    type: "bar",
+    data: {
+      labels: ["Citation coverage", "Cited sentences", "Unique domains"],
+      datasets: [
+        {label:"Multi-agent", yAxisID:"y", backgroundColor:c.agent,
+         data:[(ma.citation_coverage_mean||0)*100, (ma.sentence_citation_rate_mean||0)*100, null]},
+        {label:"Baseline", yAxisID:"y", backgroundColor:c.baseline,
+         data:[(bl.citation_coverage_mean||0)*100, (bl.sentence_citation_rate_mean||0)*100, null]},
+        {label:"Multi-agent domains", yAxisID:"y1", backgroundColor:c.agent,
+         data:[null, null, ma.source_diversity_mean||0]},
+        {label:"Baseline domains", yAxisID:"y1", backgroundColor:c.baseline,
+         data:[null, null, bl.source_diversity_mean||0]}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      scales:{
+        y:{position:"left", min:0, max:100, title:{display:true, text:"percent"}, grid:{color:c.rule}},
+        y1:{position:"right", min:0, title:{display:true, text:"domains"}, grid:{display:false}},
+        x:{grid:{display:false}}
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:(ctx) => {
+          const v = ctx.parsed.y;
+          const unit = ctx.dataset.yAxisID === "y1" ? " domains" : "%";
+          return `${ctx.dataset.label.replace(" domains","")}: ${Math.round(v*10)/10}${unit}`;
+        }}}
+      }
+    }
+  });
+}
+
+/* ---------------- contradiction tests ---------------- */
+function renderContradictions(ct){
+  $("ct-summary").textContent = ct.summary || `${ct.passed}/${ct.total} passed`;
+  $("ct-cases").innerHTML = (ct.cases || []).map(c => `
+    <li>
+      <span class="v ${c.passed ? "pass" : "fail"}">${c.passed ? "pass" : "fail"}</span>
+      <span class="id">${esc(c.id)}</span>
+      <span><strong>${esc(c.conflict_summary || c.query || "")}</strong><br>
+        <span style="color:var(--muted)">${esc(c.detail || "")}</span></span>
+    </li>`).join("");
+}
+
+/* ---------------- runs table ---------------- */
+function renderRows(){
+  const term = $("filter").value.trim().toLowerCase();
+  const rows = RUNS.filter(r => !term ||
+    [r.query, r.run_id, r.status, r.model].join(" ").toLowerCase().includes(term));
+  $("rowcount").textContent = `${rows.length} of ${RUNS.length}`;
+  $("rows").innerHTML = rows.map(r => `
+    <tr class="row" data-id="${esc(r.run_id)}" tabindex="0" role="button" aria-expanded="false">
+      <td class="mono"><span class="dot ${esc(r.status)}"></span>${esc(r.run_id.replace(/^run_/, ""))}</td>
+      <td class="q" title="${esc(r.query)}">${esc(r.query)}${r.mode === "offline" ? ' <span class="tag">offline</span>' : ""}</td>
+      <td class="kfr"><b class="k">${r.kept}</b> / <b class="f">${r.flagged}</b> / <b class="r">${r.rejected}</b></td>
+      <td class="num">${pct(r.citation_coverage)}</td>
+      <td class="num">${r.source_diversity}</td>
+      <td class="num">${(r.latency_s || 0).toFixed(1)}s</td>
+      <td class="num">${(r.tavily_credits + r.exa_credits).toFixed(1)}</td>
+    </tr>`).join("");
+  document.querySelectorAll("tr.row").forEach(tr => {
+    tr.addEventListener("click", () => toggle(tr));
+    tr.addEventListener("keydown", (e) => {
+      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); toggle(tr); }
+    });
+  });
+}
+
+async function toggle(tr){
+  const id = tr.dataset.id;
+  const next = tr.nextElementSibling;
+  if(next && next.classList.contains("detail")){
+    next.remove(); tr.setAttribute("aria-expanded","false"); OPEN = null; return;
+  }
+  document.querySelectorAll("tr.detail").forEach(el => el.remove());
+  document.querySelectorAll("tr.row").forEach(el => el.setAttribute("aria-expanded","false"));
+  tr.setAttribute("aria-expanded","true"); OPEN = id;
+
+  const holder = document.createElement("tr");
+  holder.className = "detail";
+  holder.innerHTML = `<td colspan="7"><div class="detail">Loading run detail…</div></td>`;
+  tr.after(holder);
+
+  try{
+    DETAIL[id] = DETAIL[id] || await getJSON(`/api/run/${encodeURIComponent(id)}`);
+    holder.querySelector(".detail").innerHTML = detailHTML(DETAIL[id]);
+  }catch(err){
+    holder.querySelector(".detail").innerHTML =
+      `<p class="empty">Could not load this run: ${esc(err.message)}</p>`;
+  }
+}
+
+function detailHTML(run){
+  const planner = run.planner || {};
+  const merges = planner.merges || [];
+  const claims = run.claims || [];
+  const byVerdict = (v) => claims.filter(c => c.verdict === v);
+
+  const claimBlock = (v, heading) => {
+    const items = byVerdict(v);
+    if(!items.length) return "";
+    return `<h4>${heading} (${items.length})</h4>` + items.map(c => `
+      <div class="claim ${v}">
+        <div>${esc(c.text)}</div>
+        ${c.reason ? `<div class="why">${esc(c.reason)}</div>` : ""}
+        <div class="src">${esc(c.source_url || "no source URL")}${c.url_verified ? "" : " · not retrieved by this worker"}</div>
+      </div>`).join("");
+  };
+
+  return `
+  <div class="detail-grid">
+    <div>
+      <h4>Sub-questions</h4>
+      <ul>${(run.sub_questions || []).map(s =>
+        `<li>${esc(s.sub_question)}<br><span style="color:var(--muted);font-size:13px">
+          ${esc(s.status)} · ${s.claim_count} claims · ${s.turns} tool turns${
+            (s.failures||[]).length ? ` · ${s.failures.length} failure(s)` : ""}</span></li>`
+      ).join("") || "<li>None recorded.</li>"}</ul>
+      ${merges.length ? `<h4>Merged before dispatch</h4><ul>${merges.map(m =>
+        `<li>Kept “${esc(m.kept)}”, folded in ${(m.merged_away||[]).map(x => `“${esc(x)}”`).join(", ")}
+         at similarity ${m.max_similarity}.</li>`).join("")}</ul>` : ""}
+      ${(run.contradictions||[]).length ? `<h4>Contradictions found</h4><ul>${run.contradictions.map(c =>
+        `<li>${esc(c.explanation)}<br><span class="src">${(c.sources||[]).map(esc).join(" vs ")}</span></li>`
+      ).join("")}</ul>` : ""}
+      ${(run.failures||[]).length ? `<h4>Failures and timeouts</h4><ul>${run.failures.map(f =>
+        `<li>${esc(f.stage)}/${esc(f.component)}: ${esc(f.detail)}</li>`).join("")}</ul>` : ""}
+      ${claimBlock("kept","Kept")}${claimBlock("flagged","Flagged")}${claimBlock("rejected","Thrown out")}
+    </div>
+    <div>
+      <h4>Report</h4>
+      <div class="report">${esc(run.final_report || "No report was produced.")}</div>
+      <h4>Sources</h4>
+      <ul>${(run.sources||[]).map(s =>
+        `<li class="src">[${s.index}] <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url)}</a></li>`
+      ).join("") || "<li>None.</li>"}</ul>
+    </div>
+  </div>`;
+}
+
+/* ---------------- boot ---------------- */
+async function boot(){
+  try{
+    const data = await getJSON("/api/runs");
+    RUNS = data.runs || [];
+    $("logpath").textContent = data.log_path || "";
+    renderGate(data.totals || {});
+    renderRows();
+    if(!RUNS.length){
+      $("runs-empty").innerHTML =
+        `<p class="empty">No runs logged yet. Ask the pipeline something:
+         <code>python main.py "your research question"</code></p>`;
+    }
+  }catch(err){
+    $("runs-empty").innerHTML = `<p class="empty">Could not read the run log: ${esc(err.message)}</p>`;
+  }
+
+  try{
+    const data = await getJSON("/api/eval-results");
+    renderEvalCharts(data);
+    renderContradictions(data.contradiction_tests || {passed:0,total:0,cases:[]});
+    if(data.mode === "fake"){
+      $("eval-empty").innerHTML =
+        `<p class="empty">These results came from an offline plumbing run
+         (<code>--fake</code>), so the scores describe the wiring, not the model.</p>`;
+    }
+  }catch(err){
+    const fix = err.body && err.body.fix ? err.body.fix : "python eval/run_eval.py";
+    $("eval-empty").innerHTML =
+      `<p class="empty">No eval results yet. Build the comparison with <code>${esc(fix)}</code>,
+       then reload this page.</p>`;
+    $("ct-summary").textContent = "not run yet";
+  }
+
+  $("filter").addEventListener("input", renderRows);
+}
+boot();
+</script>
+</body>
+</html>
